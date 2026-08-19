@@ -46,6 +46,9 @@ jobs:
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          test -n "$RENDER_DEPLOY_HOOK_URL"
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Le secret GitHub RENDER_DEPLOY_HOOK_URL est absent ou vide."
+            exit 1
+          fi
           curl --fail --silent --show-error --request POST \
             "${RENDER_DEPLOY_HOOK_URL}?ref=${GITHUB_SHA}"
