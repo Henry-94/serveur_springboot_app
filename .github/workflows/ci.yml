@@ -28,7 +28,13 @@ jobs:
         run: chmod +x mvnw
 
       - name: Tester le backend
-        run: ./mvnw test
+        env:
+          DB_URL: jdbc:h2:mem:ci;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+          DB_USERNAME: sa
+          DB_PASSWORD: ''
+          JWT_SECRET: ci-test-secret-ci-test-secret-ci-test
+          APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+        run: ./mvnw --batch-mode test
 
       - name: Construire le projet
-        run: ./mvnw clean package -DskipTests
+        run: ./mvnw --batch-mode clean package -DskipTests
