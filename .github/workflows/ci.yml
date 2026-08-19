@@ -1,0 +1,34 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Donner les permissions à Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Tester le backend
+        run: ./mvnw test
+
+      - name: Construire le projet
+        run: ./mvnw clean package -DskipTests
