@@ -51,4 +51,4 @@ jobs:
             exit 1
           fi
           curl --fail --silent --show-error --request POST \
-            "${RENDER_DEPLOY_HOOK_URL}?ref=${GITHUB_SHA}"
+            "$RENDER_DEPLOY_HOOK_URL"
