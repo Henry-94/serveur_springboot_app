@@ -1,0 +1,6 @@
+target/
+.env
+.git
+.idea
+*.iml
+HELP.md
