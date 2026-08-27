@@ -1,0 +1,54 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Donner les permissions à Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Tester le backend
+        env:
+          DB_URL: jdbc:h2:mem:ci;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+          DB_USERNAME: sa
+          DB_PASSWORD: ''
+          JWT_SECRET: ci-test-secret-ci-test-secret-ci-test
+          APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+        run: ./mvnw --batch-mode test
+
+      - name: Construire le projet
+        run: ./mvnw --batch-mode clean package -DskipTests
+
+      - name: Déployer sur Render
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Le secret GitHub RENDER_DEPLOY_HOOK_URL est absent ou vide."
+            exit 1
+          fi
+          curl --fail --silent --show-error --request POST \
+            "$RENDER_DEPLOY_HOOK_URL"
